@@ -15,7 +15,7 @@ start:
 	
 	include "include\ints.a80"
 	include "include\system.a80"
-	include "music\player.asm"
+	include "music\playerBuffer.asm"
 
 main:
 	ld sp,100h
@@ -32,23 +32,16 @@ mainLoop:
 	push hl : pop hl : dec b : jp nz,1b
 
 	ld a,1 : out (2),a	
-	call mus_play
-;	call flushVI	
-	call flushAY	
+	call mus_play	
 	ld a,0 : out (2),a	
 	
 
 	jp mainLoop
 
 
-music:	incbin "music\music4.tbk"
+music:	incbin "music\music.tbk"
 
-	savebin "main.rom",begin,$-begin
-
-            IF (_ERRORS = 0)                                 					
-				SHELLEXEC "main.rom"	
-			ENDIF
-
+	savebin "mainVI53.rom",begin,$-begin
 
                                                                                                         
 
