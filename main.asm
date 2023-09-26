@@ -15,7 +15,7 @@ start:
 	
 	include "include\ints.a80"
 	include "include\system.a80"
-	include "music\playerVI.asm"
+	include "music\playerNormal.asm"
 
 main:
 	ld sp,100h
@@ -39,7 +39,7 @@ mainLoop:
 	jp mainLoop
 
 
-music:	incbin "music\music.tbk"
+music:	incbin "music\music4.tbk"
 
 	savebin "main.rom",begin,$-begin
 

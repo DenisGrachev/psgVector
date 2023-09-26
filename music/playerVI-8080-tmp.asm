@@ -1,33 +1,5 @@
 
-/*
-Player for Fast PSG Packer for compression levels [4..5]
-Source for sjasm cross-assembler.
-Source code is based on psndcj/tbk player and bfox/tmk player.
-Modified by physic 8.12.2021.
-
-8080 Version by Denis Grachev
-
-Max time is 930t for compression level 4 (recomended), 1032t for compression level 5
-Player size is increased from 348 to 543 bytes.
-
-11hhhhhh llllllll nnnnnnnn	3	CALL_N - вызов с возвратом для проигрывания (nnnnnnnn + 1) значений по адресу 11hhhhhh llllllll
-10hhhhhh llllllll			2	CALL_1 - вызов с возвратом для проигрывания одного значения по адресу 11hhhhhh llllllll
-01MMMMMM mmmmmmmm			2+N	PSG2 проигрывание, где MMMMMM mmmmmmmm - инвертированная битовая маска регистров, далее следуют значения регистров.
-							во 2-м байте также инвертирован порядок следования регистров (13..6)
-
-001iiiii 					1	PSG2i проигрывание, где iiiii номер индексированной маски (0..31), далее следуют значения регистров
-0001pppp					1	PAUSE16 - пауза pppp+1 (1..16)
-0000hhhh vvvvvvvv			2	PSG1 проигрывание, 0000hhhh - номер регистра + 1, vvvvvvvv - значение
-00001111					1	маркер оцончания трека
-00000000 nnnnnnnn			2	PAUSE_N - пауза nnnnnnnn+1 фреймов (ничего не выводим в регистры)
-
-
-Nested loops are fully supported at this version. Please make sure there is enough room for nested levels.
-Packer shows max nested level. It need to increase MAX_NESTED_LEVEL variable if it not enough.
-*/
-
 ;Если определана то играем в счётчик иначе в АУ
-
 ;регистры АУ
 AYREGS:
 ;частоты
@@ -69,87 +41,86 @@ flushVI:
 
 	ld a,(AYR7)
 	or a : rra : push af
-	jp nc,1f;канал включен
-    ld a,(vCH1) : or a : jp z,2f
+	jp nc,a1;канал включен
+    ld a,(vCH1) : or a : jp z,a2
     ld a,#36 : out (08),a;глушим канал
-    xor a : ld (vCH1),a : jp 2f
-1:
+    xor a : ld (vCH1),a : jp a2
+a1
 	ld a,1 : ld (vCH1),a
-2:
+a2
 	pop af
 
 	or a : rra : push af
-	jp nc,1f;канал включен
-    ld a,(vCH2) : or a : jp z,2f
+	jp nc,b1;канал включен
+    ld a,(vCH2) : or a : jp z,b2
     ld a,#76 : out (08),a;глушим канал
-    xor a : ld (vCH2),a : jp 2f
-1:
+    xor a : ld (vCH2),a : jp b2
+b1
 	ld a,1 : ld (vCH2),a
-2:	
+b2	
 
 	pop af
 
 	or a : rra
-	jp nc,1f;канал включен
-    ld a,(vCH3) : or a : jp z,2f
+	jp nc,c1;канал включен
+    ld a,(vCH3) : or a : jp z,c2
     ld a,#b6 : out (08),a;глушим канал
-    xor a : ld (vCH3),a : jp 2f
-1:
+    xor a : ld (vCH3),a : jp c2
+c1
 	ld a,1 : ld (vCH3),a
-2:	
+c2	
 
 
 	;берём громкости
 	ld a,(AYR8)
 	;and 00001111b
-	or a : jp nz,1f	
-    ld a,(vCH1) : or a : jp z,2f
+	or a : jp nz,z1	
+    ld a,(vCH1) : or a : jp z,z2
     ld a,#36 : out (08),a;глушим канал
-    xor a : ld (vCH1),a : jp 2f
-1:
+    xor a : ld (vCH1),a : jp z2
+z1
 	ld a,1 : ld (vCH1),a
-2:
+z2:
 
 	ld a,(AYR9)
 	;and 00001111b
-	or a : jp nz,1f	
-    ld a,(vCH2) : or a : jp z,2f
+	or a : jp nz,x1
+    ld a,(vCH2) : or a : jp z,x2
     ld a,#76 : out (08),a;глушим канал
-    xor a : ld (vCH2),a : jp 2f
-1:
+    xor a : ld (vCH2),a : jp x2
+x1
 	ld a,1 : ld (vCH2),a
-2:
+x2
 
 	ld a,(AYR10)
 	;and 00001111b
-	or a : jp nz,1f	
-    ld a,(vCH3) : or a : jp z,2f
+	or a : jp nz,y1
+    ld a,(vCH3) : or a : jp z,y2
     ld a,#b6 : out (08),a;глушим канал
-    xor a : ld (vCH3),a : jp 2f
-1:
+    xor a : ld (vCH3),a : jp y2
+y1
 	ld a,1 : ld (vCH3),a
-2:
+y2
 
 
 	;пишем частоту
-	ld a,(vCH1) : or a : jp z,1f;если канал включен суём частоту	
+	ld a,(vCH1) : or a : jp z,h1;если канал включен суём частоту	
 	ld hl,(AYR0) : call FreqAY_to_VI53
 	ld a,l : out (#0b),a
 	ld a,h : out (#0b),a
-1:	
+h1	
 
-	ld a,(vCH2) : or a : jp z,1f;если канал включен суём частоту	
+	ld a,(vCH2) : or a : jp z,h2;если канал включен суём частоту	
 	ld hl,(AYR2) : call FreqAY_to_VI53
 	ld a,l : out (#0a),a
 	ld a,h : out (#0a),a
-1:
+h2
 
-	ld a,(vCH3) : or a : jp z,1f;если канал включен суём частоту	
+	ld a,(vCH3) : or a : jp z,h3;если канал включен суём частоту	
 	ld hl,(AYR4) : call FreqAY_to_VI53
 	ld a,l : out (#09),a
 	ld a,h : out (#09),a
-1:
-
+h3
 	ret
 
 
@@ -235,7 +206,7 @@ saved_track
 			jp trb_rep					
 			
 
-endtrack	//end of track
+endtrack	;end of track
 			pop	 hl
 			jp mus_init
 			
@@ -272,7 +243,7 @@ trb_play
 			ld a, (hl)
 			add a
 			jp nc, pl_frame				    
-pl1x		// Process ref	
+pl1x		;Process ref	
 			ld b, (hl)
 			inc hl
 			ld c, (hl)
@@ -288,7 +259,7 @@ pl11
 			dec (hl)
 			jp	 z, same_level_ref			
 nested_ref
-			// Save pos for the current nested level
+			;Save pos for the current nested level
 			inc	 l
 			ld	(hl),e
 			inc	l
@@ -297,7 +268,7 @@ nested_ref
 same_level_ref
 			ld	 (hl),a
 			inc	 l
-			// update nested level
+			;update nested level
 			ld	 (trb_play+1),hl			
 
 			ex	de,hl					
@@ -305,7 +276,7 @@ same_level_ref
 			ld a, (hl)
 			add a		            		
 			call pl0x						
-			// Save pos for the new nested level
+			;Save pos for the new nested level
 			;save pos
 	        ex	de,hl
 			ld	hl, (trb_play+1)
@@ -329,7 +300,7 @@ pl_pause	and	 #0f
 			inc hl
 			jp z, single_pause
 pause_cont	
-			//set pause
+			;set pause
 			ld (pause_rep), a	
 			ex	de,hl
 			ld	hl, (trb_play+1)
@@ -353,7 +324,7 @@ pause_or_psg1
 			ld a, (hl)
 			jp c, pl_pause
 			jp z, long_pause
-		    //psg1 or end of track
+		    ;psg1 or end of track
 			cp #0f
 			jp z, endtrack
 			dec a	 
@@ -371,10 +342,9 @@ pause_or_psg1
 pl00		add	 a
 			jp	 nc, pause_or_psg1
 			
-		// psg2i
+			;psg2i
 			rrca : rrca						
-			
-			;mEXX;exx	
+				
 			ld de,00000
 
 mus_low		add	 0
@@ -427,19 +397,51 @@ pl0x
 			add a					
 			jp nc, pl00						
 
-pl01	// player PSG2
+pl01	 ;player PSG2
 			inc hl
 			jp z, play_all_0_5				
 play_by_mask_0_5
-			dup 5
 				add a
-				jp c,1f
+				jp c,f1
 			    ld b,a;push af
 				ld a,(hl) : inc hl
-				ld (AYREGS + CH),a
+				ld (AYREGS + 0),a
 				ld a,b;pop af				
-1		
-			edup									
+f1		
+
+				add a
+				jp c,f2
+			    ld b,a;push af
+				ld a,(hl) : inc hl
+				ld (AYREGS + 0),a
+				ld a,b;pop af				
+f2		
+
+				add a
+				jp c,f3
+			    ld b,a;push af
+				ld a,(hl) : inc hl
+				ld (AYREGS + 0),a
+				ld a,b;pop af				
+f3		
+
+				add a
+				jp c,f4
+			    ld b,a;push af
+				ld a,(hl) : inc hl
+				ld (AYREGS + 0),a
+				ld a,b;pop af				
+f4		
+
+				add a
+				jp c,f5
+			    ld b,a;push af
+				ld a,(hl) : inc hl
+				ld (AYREGS + 0),a
+				ld a,b;pop af				
+f5		
+
+
 			add a
 			jp c, play_all_0_5_end						
 			ld a,(hl) : inc hl
@@ -455,15 +457,17 @@ play_all_0_5
 			cpl						; 0->ff			
 			ld a,(hl) : inc hl 			
 			ld (AYREGS + 0),a			
-CHN = 1
-			dup 4				
+
 				ld a,(hl) : inc hl 
-				ld (AYREGS + CHN),a				
-CHN = CHN + 1				
-			edup					
-			
-			ld a,(hl) : inc hl 
-			ld (AYREGS + CHN),a
+				ld (AYREGS + 1),a
+				ld a,(hl) : inc hl 
+				ld (AYREGS + 2),a
+				ld a,(hl) : inc hl 
+				ld (AYREGS + 3),a
+				ld a,(hl) : inc hl 
+				ld (AYREGS + 4),a
+				ld a,(hl) : inc hl 
+				ld (AYREGS + 5),a
 				
 play_all_0_5_end
 			ld a, (hl)
@@ -472,8 +476,8 @@ play_all_0_5_end
 			jp nz,play_by_mask_13_6
 play_all_6_13
 			cpl						; 0->ff, keep flag c
-			// write regs [6..12] or [6..13] depend on flag
-			jp	 c, 7f				; 4+7=11	
+			; write regs [6..12] or [6..13] depend on flag
+			jp	 c, h7				; 4+7=11	
 				
 				inc hl
 				ld a,(hl) : inc hl
@@ -488,9 +492,8 @@ play_all_6_13
 				inc hl				
 				inc hl
 
-
 			ret	
-7:				
+h7				
 				inc hl
 				ld a,(hl) : inc hl
 				ld (AYREGS + 7),a
@@ -506,29 +509,47 @@ play_all_6_13
 			
 
 play_by_mask_13_6
-			jp c,1f
+			jp c,h8
 			inc hl
-1			
+h8			
 			add a
-			jp c,1f
+			jp c,h9
 			inc hl
-1			
+h9			
 
 reg_left_6	add a
-			jp c,1f
+			jp c,e0
 			inc hl
-1			
-CH = 11
-			dup 4
-CH = CH - 1			
+e0			
 				add a
-				jp c,1f
-				ld e,a;push af
+				jp c,e1
+				ld e,a
 				ld a,(hl) : inc hl 				
-				ld (AYREGS + CH),a
-				ld a,e;pop af
-1									
-			edup
+				ld (AYREGS + 10),a
+				ld a,e
+e1
+				add a
+				jp c,e2
+				ld e,a
+				ld a,(hl) : inc hl 				
+				ld (AYREGS + 9),a
+				ld a,e
+e2
+				add a
+				jp c,e3
+				ld e,a
+				ld a,(hl) : inc hl 				
+				ld (AYREGS + 8),a
+				ld a,e
+e3:
+				add a
+				jp c,e4
+				ld e,a
+				ld a,(hl) : inc hl 				
+				ld (AYREGS + 7),a
+				ld a,e
+e4
+
 
  			add a
 			ret c	
@@ -537,50 +558,64 @@ CH = CH - 1
 
 reg_left_6_D5
 			add a
-			jp c,1f
+			jp c,e5
 			ld e,a;push af
 			ld a,(hl) : inc hl
 			ld (AYREGS + 5),a
 			ld a,e;pop af
+e5	
 
-1			
-CH=5
-			dup 4
-CH=CH-1			
 				add a
-				jp c,1f
-
+				jp c,g1
 				ld e,a;push af
 				ld a,(hl) : inc hl 				
-				ld (AYREGS + CH),a
+				ld (AYREGS + 4),a
 				ld a,e;pop af
-1									
-			edup
- 			add a
+g1					
+				add a
+				jp c,g2
+				ld e,a;push af
+				ld a,(hl) : inc hl 				
+				ld (AYREGS + 3),a
+				ld a,e;pop af
+g2
+				add a
+				jp c,g3
+				ld e,a;push af
+				ld a,(hl) : inc hl 				
+				ld (AYREGS + 2),a
+				ld a,e;pop af
+g3					
+				add a
+				jp c,g4
+				ld e,a;push af
+				ld a,(hl) : inc hl 				
+				ld (AYREGS + 1),a
+				ld a,e;pop af
+g4										
+			add a
 			ret c
-CH=CH-1		
 			ld a,(hl) : inc hl 
-			ld (AYREGS + CH),a
+			ld (AYREGS + 0),a
 			ret					
 
 stack_pos	
-			;dup MAX_NESTED_LEVEL		// Make sure packed file has enough nested level here
-				DB 0	// counter
-				DW 0	// HL value (position)
-                DB 0	// counter
-				DW 0	// HL value (position)
-                DB 0	// counter
-				DW 0	// HL value (position)
-                DB 0	// counter
-				DW 0	// HL value (position)
-                DB 0	// counter
-				DW 0	// HL value (position)
-                DB 0	// counter
-				DW 0	// HL value (position)
-                DB 0	// counter
-				DW 0	// HL value (position)
-                DB 0	// counter
-				DW 0	// HL value (position)
-			;edup
+			;Make sure packed file has enough nested level here
+				DB 0	; counter
+				DW 0	; HL value (position)
+                DB 0	; counter
+				DW 0	; HL value (position)
+                DB 0	; counter
+				DW 0	; HL value (position)
+                DB 0	; counter
+				DW 0	; HL value (position)
+                DB 0	; counter
+				DW 0	; HL value (position)
+                DB 0	; counter
+				DW 0	; HL value (position)
+                DB 0	; counter
+				DW 0	; HL value (position)
+                DB 0	; counter
+				DW 0	; HL value (position)			
 stack_pos_end
 
