@@ -40,96 +40,150 @@ vCH3: db 0
 flushVI:
 
 	ld a,(AYR7)
-	or a : rra : push af
+	or a 
+        rra
+        push af
 	jp nc,a1;канал включен
-    ld a,(vCH1) : or a : jp z,a2
-    ld a,#36 : out (08),a;глушим канал
-    xor a : ld (vCH1),a : jp a2
-a1
-	ld a,1 : ld (vCH1),a
-a2
+        ld a,(vCH1)
+        or a
+        jp z,a2
+        ld a,$36
+        out (08),a;глушим канал
+        xor a
+        ld (vCH1),a
+        jp a2
+a1:
+	ld a,1
+        ld (vCH1),a
+a2:
 	pop af
 
-	or a : rra : push af
+	or a
+        rra
+        push af
 	jp nc,b1;канал включен
-    ld a,(vCH2) : or a : jp z,b2
-    ld a,#76 : out (08),a;глушим канал
-    xor a : ld (vCH2),a : jp b2
-b1
-	ld a,1 : ld (vCH2),a
-b2	
-
+	ld a,(vCH2)
+	or a
+	jp z,b2
+	ld a,$76
+	out (08),a;глушим канал
+        xor a
+	ld (vCH2),a
+	jp b2
+b1:
+	ld a,1
+	ld (vCH2),a
+b2:
 	pop af
 
-	or a : rra
+	or a
+	rra
 	jp nc,c1;канал включен
-    ld a,(vCH3) : or a : jp z,c2
-    ld a,#b6 : out (08),a;глушим канал
-    xor a : ld (vCH3),a : jp c2
-c1
-	ld a,1 : ld (vCH3),a
-c2	
+	ld a,(vCH3)
+	or a
+	jp z,c2
+	ld a,$b6
+	out (08),a;глушим канал
+	xor a
+	ld (vCH3),a
+	jp c2
+c1:
+	ld a,1
+	ld (vCH3),a
+c2:
 
 
 	;берём громкости
 	ld a,(AYR8)
 	;and 00001111b
-	or a : jp nz,z1	
-    ld a,(vCH1) : or a : jp z,z2
-    ld a,#36 : out (08),a;глушим канал
-    xor a : ld (vCH1),a : jp z2
-z1
-	ld a,1 : ld (vCH1),a
+	or a
+	jp nz,z1	
+	ld a,(vCH1)
+	or a
+	jp z,z2
+	ld a,$36
+	out (08),a;глушим канал
+	xor a
+	ld (vCH1),a
+	jp z2
+z1:
+	ld a,1
+	ld (vCH1),a
 z2:
 
 	ld a,(AYR9)
 	;and 00001111b
-	or a : jp nz,x1
-    ld a,(vCH2) : or a : jp z,x2
-    ld a,#76 : out (08),a;глушим канал
-    xor a : ld (vCH2),a : jp x2
-x1
-	ld a,1 : ld (vCH2),a
-x2
-
+	or a
+	jp nz,x1
+	ld a,(vCH2)
+	or a
+	jp z,x2
+    	ld a,$76
+	out (08),a;глушим канал
+	xor a
+	ld (vCH2),a
+	jp x2
+x1:
+	ld a,1
+	ld (vCH2),a
+x2:
 	ld a,(AYR10)
 	;and 00001111b
-	or a : jp nz,y1
-    ld a,(vCH3) : or a : jp z,y2
-    ld a,#b6 : out (08),a;глушим канал
-    xor a : ld (vCH3),a : jp y2
-y1
-	ld a,1 : ld (vCH3),a
-y2
-
+	or a
+	jp nz,y1
+	ld a,(vCH3)
+	or a
+	jp z,y2
+	ld a,$b6
+	out (08),a;глушим канал
+	xor a
+	ld (vCH3),a
+	jp y2
+y1:
+	ld a,1
+	ld (vCH3),a
+y2:
 
 	;пишем частоту
-	ld a,(vCH1) : or a : jp z,h1;если канал включен суём частоту	
-	ld hl,(AYR0) : call FreqAY_to_VI53
-	ld a,l : out (#0b),a
-	ld a,h : out (#0b),a
-h1	
+	ld a,(vCH1)
+	or a
+	jp z,h1;если канал включен суём частоту	
+	ld hl,(AYR0)
+	call FreqAY_to_VI53
+	ld a,l
+	out ($0b),a
+	ld a,h
+	out ($0b),a
+h1:
+	ld a,(vCH2)
+	or a
+	jp z,h2;если канал включен суём частоту	
+	ld hl,(AYR2)
+	call FreqAY_to_VI53
+	ld a,l
+	out ($0a),a
+	ld a,h
+	out ($0a),a
+h2:
 
-	ld a,(vCH2) : or a : jp z,h2;если канал включен суём частоту	
-	ld hl,(AYR2) : call FreqAY_to_VI53
-	ld a,l : out (#0a),a
-	ld a,h : out (#0a),a
-h2
-
-	ld a,(vCH3) : or a : jp z,h3;если канал включен суём частоту	
-	ld hl,(AYR4) : call FreqAY_to_VI53
-	ld a,l : out (#09),a
-	ld a,h : out (#09),a
-h3
+	ld a,(vCH3)
+	or a
+	jp z,h3;если канал включен суём частоту	
+	ld hl,(AYR4)
+	call FreqAY_to_VI53
+	ld a,l
+	out ($09),a
+	ld a,h
+	out ($09),a
+h3:
 	ret
-
 
 FreqAY_to_VI53:
 		;dirty
 		;add hl,hl : add hl,hl : add hl,hl : add hl,hl
 		;ret
 		;more precise
-        ;l-low h-high freq
+	        ;l-low h-high freq
 		ld	a,00001111b
 		and	h
 		ld	h, a
@@ -155,18 +209,19 @@ Not0Freq:
 		pop	bc
 		ret
 
-
-
 ;init = mus_init
 ;play =  trb_play
-mus_stop
-stop	
-			ld a,#36 : out (08),a;
-			ld a,#76 : out (08),a;
-			ld a,#b6 : out (08),a;
+mus_stop:
+stop:
+			ld a,$36
+			out (08),a;
+			ld a,$76
+			out (08),a;
+			ld a,$b6
+			out (08),a;
 			ret
 
-mus_init	ld hl, music
+mus_init		ld hl, music
 			ld	 a, l
 			ld	 (mus_low+1), a
 			ld	 a, h
@@ -184,20 +239,24 @@ mus_init	ld hl, music
 
 			ld (trb_play+1), hl				
 
-			ld a,#36 : out (08),a;
-			ld a,#76 : out (08),a;
-			ld a,#b6 : out (08),a;
+			ld a,$36
+			out (08),a;
+			ld a,$76
+			out (08),a;
+			ld a,$b6
+			out (08),a;
 			
 			ret			
 					
 			
 
 pause_rep	db 0
-trb_pause	ld hl,pause_rep
+trb_pause		ld hl,pause_rep
 			dec	 (hl)
 			ret nz						
 
-			ld a,(savedByte) : ld (trb_play+2),a
+			ld a,(savedByte)
+			ld (trb_play+2),a
 
 saved_track	
 			ld hl, LD_HL_CODE			; end of pause
@@ -296,7 +355,7 @@ long_pause
 			ld	 a, (hl)
 			inc hl
 			jp	 pause_cont
-pl_pause	and	 #0f
+pl_pause	and	 $0f
 			inc hl
 			jp z, single_pause
 pause_cont	
@@ -311,30 +370,39 @@ pause_cont
 			inc	l
 			ld	(hl),d						
 			
-			ld a,(trb_play+2) : ld (savedByte),a
+			ld a,(trb_play+2)
+			ld (savedByte),a
 ;=====================================================================		    
-			ld a,JP_CODE : ld (trb_play),a
-			ld hl,trb_pause : ld (trb_play+1),hl						
-;=====================================================================						
+			ld a,JP_CODE
+			ld (trb_play),a
+			ld hl,trb_pause
+			ld (trb_play+1),hl						
+;====================================================================						
 			pop	 hl						
 			ret								
-
 pause_or_psg1
 			add	 a
 			ld a, (hl)
 			jp c, pl_pause
 			jp z, long_pause
 		    ;psg1 or end of track
-			cp #0f
+			cp $0f
 			jp z, endtrack
 			dec a	 
 			inc hl
 						
 ;===============================================================================						
-			push de : push hl
-			ld hl,AYREGS : ld e,a : ld d,0 : add hl,de : ex hl,de
+			push de
+			push hl
+			ld hl,AYREGS	
+			ld e,a
+			ld d,0
+			add hl,de
+			ex hl,de
 			pop hl
-			ld a,(hl) : inc hl : ld (de),a
+			ld a,(hl)
+			inc hl
+			ld (de),a
 			pop de
 ;===============================================================================						
 			ret								
@@ -343,13 +411,14 @@ pl00		add	 a
 			jp	 nc, pause_or_psg1
 			
 			;psg2i
-			rrca : rrca						
+			rrca
+			rrca						
 				
 			ld de,00000
 
-mus_low		add	 0
+mus_low			add	 0
 			ld	 e, a
-mus_high	adc	 0
+mus_high		adc	 0
 			sub	 e
 			ld	 d, a					
 			ld	 a,(de)
@@ -380,7 +449,9 @@ pl10
 			ex	de,hl
 
 			;set 6, b
-			ld a,b : or 01000000b : ld b,a
+			ld a,b
+			or 01000000b
+			ld b,a
 
 			add hl,bc
 
@@ -403,8 +474,9 @@ pl01	 ;player PSG2
 play_by_mask_0_5
 				add a
 				jp c,f1
-			    ld b,a;push af
-				ld a,(hl) : inc hl
+	  		    ld b,a;push af
+				ld a,(hl) 
+				 inc hl
 				ld (AYREGS + 0),a
 				ld a,b;pop af				
 f1		
@@ -412,7 +484,8 @@ f1
 				add a
 				jp c,f2
 			    ld b,a;push af
-				ld a,(hl) : inc hl
+				ld a,(hl)
+				 inc hl
 				ld (AYREGS + 0),a
 				ld a,b;pop af				
 f2		
@@ -420,7 +493,8 @@ f2
 				add a
 				jp c,f3
 			    ld b,a;push af
-				ld a,(hl) : inc hl
+				ld a,(hl)
+				 inc hl
 				ld (AYREGS + 0),a
 				ld a,b;pop af				
 f3		
@@ -428,7 +502,8 @@ f3
 				add a
 				jp c,f4
 			    ld b,a;push af
-				ld a,(hl) : inc hl
+				ld a,(hl)
+				inc hl
 				ld (AYREGS + 0),a
 				ld a,b;pop af				
 f4		
@@ -436,7 +511,8 @@ f4
 				add a
 				jp c,f5
 			    ld b,a;push af
-				ld a,(hl) : inc hl
+				ld a,(hl)
+				 inc hl
 				ld (AYREGS + 0),a
 				ld a,b;pop af				
 f5		
@@ -444,7 +520,8 @@ f5
 
 			add a
 			jp c, play_all_0_5_end						
-			ld a,(hl) : inc hl
+			ld a,(hl)
+			 inc hl
 			ld (AYREGS + 5),a
 
 
@@ -455,18 +532,24 @@ before_6    add a
 			jp play_by_mask_13_6			
 play_all_0_5			
 			cpl						; 0->ff			
-			ld a,(hl) : inc hl 			
+			ld a,(hl)
+			inc hl 			
 			ld (AYREGS + 0),a			
 
-				ld a,(hl) : inc hl 
+				ld a,(hl)
+				inc hl 
 				ld (AYREGS + 1),a
-				ld a,(hl) : inc hl 
+				ld a,(hl)
+				inc hl 
 				ld (AYREGS + 2),a
-				ld a,(hl) : inc hl 
+				ld a,(hl)
+				inc hl 
 				ld (AYREGS + 3),a
-				ld a,(hl) : inc hl 
+				ld a,(hl)
+				inc hl 
 				ld (AYREGS + 4),a
-				ld a,(hl) : inc hl 
+				ld a,(hl)
+				inc hl 
 				ld (AYREGS + 5),a
 				
 play_all_0_5_end
@@ -480,28 +563,35 @@ play_all_6_13
 			jp	 c, h7				; 4+7=11	
 				
 				inc hl
-				ld a,(hl) : inc hl
+				ld a,(hl)
+				inc hl
 				ld (AYREGS + 7),a
-				ld a,(hl) : inc hl
+				ld a,(hl)
+				inc hl
 				ld (AYREGS + 8),a
-				ld a,(hl) : inc hl
+				ld a,(hl)
+				inc hl
 				ld (AYREGS + 9),a
-				ld a,(hl) : inc hl
+				ld a,(hl)
+				inc hl
 				ld (AYREGS + 10),a			
 				inc hl
 				inc hl				
 				inc hl
-
 			ret	
 h7				
 				inc hl
-				ld a,(hl) : inc hl
+				ld a,(hl)
+				inc hl
 				ld (AYREGS + 7),a
-				ld a,(hl) : inc hl
+				ld a,(hl)
+				inc hl
 				ld (AYREGS + 8),a
-				ld a,(hl) : inc hl
+				ld a,(hl)
+				inc hl
 				ld (AYREGS + 9),a
-				ld a,(hl) : inc hl
+				ld a,(hl)
+				inc hl
 				ld (AYREGS + 10),a
 				inc hl
 				inc hl
@@ -524,28 +614,32 @@ e0
 				add a
 				jp c,e1
 				ld e,a
-				ld a,(hl) : inc hl 				
+				ld a,(hl)
+				inc hl 				
 				ld (AYREGS + 10),a
 				ld a,e
 e1
 				add a
 				jp c,e2
 				ld e,a
-				ld a,(hl) : inc hl 				
+				ld a,(hl)
+				inc hl 				
 				ld (AYREGS + 9),a
 				ld a,e
 e2
 				add a
 				jp c,e3
 				ld e,a
-				ld a,(hl) : inc hl 				
+				ld a,(hl)
+				inc hl 				
 				ld (AYREGS + 8),a
 				ld a,e
 e3:
 				add a
 				jp c,e4
 				ld e,a
-				ld a,(hl) : inc hl 				
+				ld a,(hl)
+				inc hl 				
 				ld (AYREGS + 7),a
 				ld a,e
 e4
@@ -560,7 +654,8 @@ reg_left_6_D5
 			add a
 			jp c,e5
 			ld e,a;push af
-			ld a,(hl) : inc hl
+			ld a,(hl)
+			inc hl
 			ld (AYREGS + 5),a
 			ld a,e;pop af
 e5	
@@ -568,34 +663,39 @@ e5
 				add a
 				jp c,g1
 				ld e,a;push af
-				ld a,(hl) : inc hl 				
+				ld a,(hl)
+				inc hl 				
 				ld (AYREGS + 4),a
 				ld a,e;pop af
 g1					
 				add a
 				jp c,g2
 				ld e,a;push af
-				ld a,(hl) : inc hl 				
+				ld a,(hl)
+				inc hl 				
 				ld (AYREGS + 3),a
 				ld a,e;pop af
 g2
 				add a
 				jp c,g3
 				ld e,a;push af
-				ld a,(hl) : inc hl 				
+				ld a,(hl)
+				inc hl 				
 				ld (AYREGS + 2),a
 				ld a,e;pop af
 g3					
 				add a
 				jp c,g4
 				ld e,a;push af
-				ld a,(hl) : inc hl 				
+				ld a,(hl)
+				inc hl 				
 				ld (AYREGS + 1),a
 				ld a,e;pop af
 g4										
 			add a
 			ret c
-			ld a,(hl) : inc hl 
+			ld a,(hl)
+			inc hl 
 			ld (AYREGS + 0),a
 			ret					
 
@@ -603,19 +703,19 @@ stack_pos
 			;Make sure packed file has enough nested level here
 				DB 0	; counter
 				DW 0	; HL value (position)
-                DB 0	; counter
+		                DB 0	; counter
 				DW 0	; HL value (position)
-                DB 0	; counter
+                		DB 0	; counter
 				DW 0	; HL value (position)
-                DB 0	; counter
+		                DB 0	; counter
 				DW 0	; HL value (position)
-                DB 0	; counter
+		                DB 0	; counter
 				DW 0	; HL value (position)
-                DB 0	; counter
+		                DB 0	; counter
 				DW 0	; HL value (position)
-                DB 0	; counter
+		                DB 0	; counter
 				DW 0	; HL value (position)
-                DB 0	; counter
+		                DB 0	; counter
 				DW 0	; HL value (position)			
 stack_pos_end
 
