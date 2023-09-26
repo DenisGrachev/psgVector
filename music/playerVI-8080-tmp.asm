@@ -221,7 +221,8 @@ stop:
 			out (08),a;
 			ret
 
-mus_init		ld hl, music
+mus_init:
+			ld hl, music
 			ld	 a, l
 			ld	 (mus_low+1), a
 			ld	 a, h
@@ -250,28 +251,32 @@ mus_init		ld hl, music
 					
 			
 
-pause_rep	db 0
-trb_pause		ld hl,pause_rep
+pause_rep:
+			db 0
+trb_pause:
+			ld hl,pause_rep
 			dec	 (hl)
 			ret nz						
 
 			ld a,(savedByte)
 			ld (trb_play+2),a
 
-saved_track	
+saved_track:
 			ld hl, LD_HL_CODE			; end of pause
 			ld (trb_play), hl
 			ld	hl, (trb_play+1)		
 			jp trb_rep					
 			
 
-endtrack	;end of track
+endtrack:
+	;end of track
 			pop	 hl
 			jp mus_init
 			
 
-pl_frame	call pl0x						
-after_play_frame
+pl_frame:
+			call pl0x						
+after_play_frame:
 			xor	 a
 			ld	 (stack_pos), a				
 			
@@ -283,33 +288,34 @@ after_play_frame
 			ld	(hl),d			
 
 			dec	 l							
-trb_rep		dec	 l
+trb_rep:
+			dec	 l
 			dec (hl)
 			ret	 nz							
-trb_rest	
+trb_rest:	
 			dec	 l
 			dec	 l
 			ld	 (trb_play+1), hl
 			ret								
 
-mus_play		
+mus_play:
 			call trb_play		
 			call flushVI		
 			ret
 
-trb_play				
+trb_play:
 			ld hl, (stack_pos+1)
 			ld a, (hl)
 			add a
 			jp nc, pl_frame				    
-pl1x		;Process ref	
+pl1x:
+			;Process ref	
 			ld b, (hl)
 			inc hl
 			ld c, (hl)
 			inc hl
 			jp p, pl10						
-
-pl11		
+pl11:		
 			ld a, (hl)			
 			inc hl	
 			ex	de,hl
@@ -317,14 +323,14 @@ pl11
 			dec	 l
 			dec (hl)
 			jp	 z, same_level_ref			
-nested_ref
+nested_ref:
 			;Save pos for the current nested level
 			inc	 l
 			ld	(hl),e
 			inc	l
 			ld	(hl),d
 			inc  l							
-same_level_ref
+same_level_ref:
 			ld	 (hl),a
 			inc	 l
 			;update nested level
@@ -337,7 +343,7 @@ same_level_ref
 			call pl0x						
 			;Save pos for the new nested level
 			;save pos
-	        ex	de,hl
+		        ex	de,hl
 			ld	hl, (trb_play+1)
 			ld	(hl),e
 			inc	l
@@ -345,20 +351,22 @@ same_level_ref
 			ret							 
 			
 
-savedByte: db 0
+savedByte:
+	 db 0
 
-single_pause
+single_pause:
 			pop	 de
 			jp	 after_play_frame
-long_pause
+long_pause:
 			inc	 hl
 			ld	 a, (hl)
 			inc hl
 			jp	 pause_cont
-pl_pause	and	 $0f
+pl_pause:
+			and	 $0f
 			inc hl
 			jp z, single_pause
-pause_cont	
+pause_cont:
 			;set pause
 			ld (pause_rep), a	
 			ex	de,hl
@@ -380,7 +388,7 @@ pause_cont
 ;====================================================================						
 			pop	 hl						
 			ret								
-pause_or_psg1
+pause_or_psg1:
 			add	 a
 			ld a, (hl)
 			jp c, pl_pause
@@ -407,7 +415,8 @@ pause_or_psg1
 ;===============================================================================						
 			ret								
 
-pl00		add	 a
+pl00:
+			add	 a
 			jp	 nc, pause_or_psg1
 			
 			;psg2i
@@ -416,9 +425,11 @@ pl00		add	 a
 				
 			ld de,00000
 
-mus_low			add	 0
+mus_low:
+			add	 0
 			ld	 e, a
-mus_high		adc	 0
+mus_high:
+			adc	 0
 			sub	 e
 			ld	 d, a					
 			ld	 a,(de)
@@ -438,9 +449,9 @@ mus_high		adc	 0
 
 		
 
-pl10
+pl10:
 			;save pos
-	        ex	de,hl
+		        ex	de,hl
 			ld	hl, (trb_play+1)
 			ld	(hl),e
 			inc	l
@@ -464,14 +475,15 @@ pl10
 			
 
 
-pl0x					
+pl0x:
 			add a					
 			jp nc, pl00						
 
-pl01	 ;player PSG2
+pl01:
+			 ;player PSG2
 			inc hl
 			jp z, play_all_0_5				
-play_by_mask_0_5
+play_by_mask_0_5:
 				add a
 				jp c,f1
 	  		    ld b,a;push af
@@ -479,7 +491,7 @@ play_by_mask_0_5
 				 inc hl
 				ld (AYREGS + 0),a
 				ld a,b;pop af				
-f1		
+f1:
 
 				add a
 				jp c,f2
@@ -488,7 +500,7 @@ f1
 				 inc hl
 				ld (AYREGS + 0),a
 				ld a,b;pop af				
-f2		
+f2:
 
 				add a
 				jp c,f3
@@ -497,7 +509,7 @@ f2
 				 inc hl
 				ld (AYREGS + 0),a
 				ld a,b;pop af				
-f3		
+f3:
 
 				add a
 				jp c,f4
@@ -506,7 +518,7 @@ f3
 				inc hl
 				ld (AYREGS + 0),a
 				ld a,b;pop af				
-f4		
+f4:
 
 				add a
 				jp c,f5
@@ -515,22 +527,20 @@ f4
 				 inc hl
 				ld (AYREGS + 0),a
 				ld a,b;pop af				
-f5		
-
-
+f5:
 			add a
 			jp c, play_all_0_5_end						
 			ld a,(hl)
 			 inc hl
 			ld (AYREGS + 5),a
-
-
-second_mask	ld a, (hl)
+second_mask:
+			ld a, (hl)
 			inc hl					
-before_6    add a
+before_6:
+			add a
 			jp z,play_all_6_13							
 			jp play_by_mask_13_6			
-play_all_0_5			
+play_all_0_5:
 			cpl						; 0->ff			
 			ld a,(hl)
 			inc hl 			
@@ -552,12 +562,12 @@ play_all_0_5
 				inc hl 
 				ld (AYREGS + 5),a
 				
-play_all_0_5_end
+play_all_0_5_end:
 			ld a, (hl)
 			inc hl					
 			add a
 			jp nz,play_by_mask_13_6
-play_all_6_13
+play_all_6_13:
 			cpl						; 0->ff, keep flag c
 			; write regs [6..12] or [6..13] depend on flag
 			jp	 c, h7				; 4+7=11	
@@ -579,7 +589,7 @@ play_all_6_13
 				inc hl				
 				inc hl
 			ret	
-h7				
+h7:
 				inc hl
 				ld a,(hl)
 				inc hl
@@ -598,19 +608,20 @@ h7
 			ret			
 			
 
-play_by_mask_13_6
+play_by_mask_13_6:
 			jp c,h8
 			inc hl
-h8			
+h8:
 			add a
 			jp c,h9
 			inc hl
-h9			
+h9:
 
-reg_left_6	add a
+reg_left_6:
+			add a
 			jp c,e0
 			inc hl
-e0			
+e0:
 				add a
 				jp c,e1
 				ld e,a
@@ -618,7 +629,7 @@ e0
 				inc hl 				
 				ld (AYREGS + 10),a
 				ld a,e
-e1
+e1:
 				add a
 				jp c,e2
 				ld e,a
@@ -626,7 +637,7 @@ e1
 				inc hl 				
 				ld (AYREGS + 9),a
 				ld a,e
-e2
+e2:
 				add a
 				jp c,e3
 				ld e,a
@@ -642,7 +653,7 @@ e3:
 				inc hl 				
 				ld (AYREGS + 7),a
 				ld a,e
-e4
+e4:
 
 
  			add a
@@ -650,7 +661,7 @@ e4
 			inc hl
 			ret		
 
-reg_left_6_D5
+reg_left_6_D5:
 			add a
 			jp c,e5
 			ld e,a;push af
@@ -658,7 +669,7 @@ reg_left_6_D5
 			inc hl
 			ld (AYREGS + 5),a
 			ld a,e;pop af
-e5	
+e5:
 
 				add a
 				jp c,g1
@@ -667,7 +678,7 @@ e5
 				inc hl 				
 				ld (AYREGS + 4),a
 				ld a,e;pop af
-g1					
+g1:
 				add a
 				jp c,g2
 				ld e,a;push af
@@ -675,7 +686,7 @@ g1
 				inc hl 				
 				ld (AYREGS + 3),a
 				ld a,e;pop af
-g2
+g2:
 				add a
 				jp c,g3
 				ld e,a;push af
@@ -683,7 +694,7 @@ g2
 				inc hl 				
 				ld (AYREGS + 2),a
 				ld a,e;pop af
-g3					
+g3:
 				add a
 				jp c,g4
 				ld e,a;push af
@@ -691,7 +702,7 @@ g3
 				inc hl 				
 				ld (AYREGS + 1),a
 				ld a,e;pop af
-g4										
+g4:
 			add a
 			ret c
 			ld a,(hl)
@@ -699,7 +710,7 @@ g4
 			ld (AYREGS + 0),a
 			ret					
 
-stack_pos	
+stack_pos:
 			;Make sure packed file has enough nested level here
 				DB 0	; counter
 				DW 0	; HL value (position)
@@ -717,5 +728,5 @@ stack_pos
 				DW 0	; HL value (position)
 		                DB 0	; counter
 				DW 0	; HL value (position)			
-stack_pos_end
+stack_pos_end:
 
