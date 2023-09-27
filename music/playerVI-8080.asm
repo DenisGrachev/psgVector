@@ -1,3 +1,4 @@
+
 ;Если определана то играем в счётчик иначе в АУ
 ;регистры АУ
 AYREGS:
@@ -42,12 +43,14 @@ flushVI:
 	ora a 
         rar
         push psw
-	jnc a1;канал включен
+	 jnc a1
+	;канал включен
         lda vCH1
         ora a
-        jz a2
+         jz a2
         mvi a,$36
-        out 08;глушим канал
+        out 08
+	;глушим канал
         xra a
         sta vCH1
         jmp a2
@@ -60,12 +63,14 @@ a2:
 	ora a
         rar
         push psw
-	 jnc b1;канал включен
+	 jnc b1
+	;канал включен
 	lda vCH2
 	ora a
 	 jz b2
 	mvi a,$76
-	out 08;глушим канал
+	out 08
+	;глушим канал
         xra a
 	sta vCH2
 	jmp b2
@@ -77,12 +82,14 @@ b2:
 
 	ora a
 	rar
-	 jnc c1;канал включен
+	 jnc c1
+	;канал включен
 	lda vCH3
 	ora a
 	 jz c2
 	mvi a,$b6
-	out 08;глушим канал
+	out 08
+	;глушим канал
 	xra a
 	sta vCH3
 	jmp c2
@@ -90,8 +97,6 @@ c1:
 	mvi a,1
 	sta vCH3
 c2:
-
-
 	;берём громкости
 	lda AYR8
 	;and 00001111b
@@ -101,7 +106,8 @@ c2:
 	ora a
 	 jz z2
 	mvi a,$36
-	out 08;глушим канал
+	out 08
+	;глушим канал
 	xra a
 	sta vCH1
 	jmp z2
@@ -109,7 +115,6 @@ z1:
 	mvi a,1
 	sta vCH1
 z2:
-
 	lda AYR9
 	;and 00001111b
 	ora a
@@ -118,7 +123,8 @@ z2:
 	ora a
 	 jz x2
     	mvi a,$76
-	out 08;глушим канал
+	out 08
+	;глушим канал
 	xra a
 	sta vCH2
 	jmp x2
@@ -134,7 +140,8 @@ x2:
 	ora a
 	 jz y2
 	mvi a,$b6
-	out 08;глушим канал
+	out 08
+	;глушим канал
 	xra a
 	sta vCH3
 	jmp y2
@@ -142,11 +149,11 @@ y1:
 	mvi a,1
 	sta vCH3
 y2:
-
 	;пишем частоту
 	lda vCH1
 	ora a
-	 jz h1;если канал включен суём частоту	
+	 jz h1
+	;если канал включен суём частоту	
 	lhld AYR0
 	call FreqAY_to_VI53
 	mov a,l
@@ -156,7 +163,8 @@ y2:
 h1:
 	lda vCH2
 	ora a
-	 jz h2;если канал включен суём частоту	
+	 jz h2
+	;если канал включен суём частоту	
 	lhld AYR2
 	call FreqAY_to_VI53
 	mov a,l
@@ -164,10 +172,10 @@ h1:
 	mov a,h
 	out $0a
 h2:
-
 	lda vCH3
 	ora a
-	 jz h3;если канал включен суём частоту	
+	 jz h3
+	;если канал включен суём частоту	
 	lhld AYR4
 	call FreqAY_to_VI53
 	mov a,l
@@ -183,70 +191,73 @@ FreqAY_to_VI53:
 		;ret
 		;more precise
 	        ;l-low h-high freq
-		mvi	a,00001111b
-		ana	h
-		mov	h, a
+		mvi a,00001111b
+		ana h
+		mov h,a
 Not0Freq:
-		push	b
-		mov	b,h
-		mov	c,l
-		dad	h
-		mov	e, l
-		mov	d, h
-		dad	h
-		dad	d
-		dad	h	;*12
-		dad	b	;*13
-		mov	a,b
-		ora	a
+		push b
+		mov b,h
+		mov c,l
+		dad h
+		mov e,l
+		mov d,h
+		dad h
+		dad d
+		dad h	
+		;*12
+		dad b
+		;*13
+		mov a,b
+		ora a
 		rar
-		mov	b,a
-		mov	a,c
+		mov b,a
+		mov a,c
 		rar
-		mov	c,a
-		dad	b	;*13.5
-		pop	b
+		mov c,a
+		dad b
+		;*13.5
+		pop b
 		ret
 
 ;init = mus_init
 ;play =  trb_play
 mus_stop:
 stop:
-			mvi a,$36
-			out 08;
-			mvi a,$76
-			out 08;
-			mvi a,$b6
-			out 08;
-			ret
+		mvi a,$36
+		out 08
+		mvi a,$76
+		out 08
+		mvi a,$b6
+		out 08
+		ret
 
 mus_init:
-			lxi h, music
-			mov	 a, l
-			sta	 mus_low+1
-			mov	 a, h
-			sta	 mus_high+1
-			lxi	d, 16*4
-			dad d
-			SHLD stack_pos+1
-			mvi a, LD_HL_CODE
-			sta trb_play
+		lxi h,music
+		mov a,l
+		sta mus_low+1
+		mov a,h
+		sta mus_high+1
+		lxi d,16*4
+		dad d
+		shld stack_pos+1
+		mvi a,LD_HL_CODE
+		sta trb_play
 
-			xra a
-			lxi h, stack_pos
-			mov m, a
-			inx h
+		xra a
+		lxi h,stack_pos
+		mov m,a
+		inx h
 
-			SHLD trb_play+1
+		shld trb_play+1
 
-			mvi a,$36
-			out 08;
-			mvi a,$76
-			out 08;
-			mvi a,$b6
-			out 08;
-			
-			ret			
+		mvi a,$36
+		out 08
+		mvi a,$76
+		out 08
+		mvi a,$b6
+		out 08
+		
+		ret			
 					
 			
 
@@ -254,47 +265,48 @@ pause_rep:
 			db 0
 trb_pause:
 			lxi h,pause_rep
-			dcr	 m
+			dcr m
 			 rnz						
 
 			lda savedByte
 			sta trb_play+2
 
 saved_track:
-			lxi h, LD_HL_CODE			; end of pause
-			SHLD trb_play
-			lxi	h, trb_play+1	
+			lxi h,LD_HL_CODE
+			; end of pause
+			shld trb_play
+			lhld trb_play+1
 			jmp trb_rep					
 			
 
 endtrack:
-	;end of track
-			pop	 h
+			;end of track
+			pop h
 			jmp mus_init
 			
 
 pl_frame:
 			call pl0x						
 after_play_frame:
-			xra	 a
+			xra a
 			sta stack_pos
 			
-            ;save pos
-	        xchg
-			lxi	h, trb_play+1
-			mov	m,e
-			inr	l
-			mov	m,d			
+	            ;save pos
+		        xchg
+			lhld trb_play+1
+			mov m,e
+			inr l
+			mov m,d			
 
-			dcr	 l							
+			dcr l							
 trb_rep:
-			dcr	 l
+			dcr l
 			dcr m
-			ret	 nz							
+			 rnz							
 trb_rest:	
-			dcr	 l
-			dcr	 l
-			SHLD	 trb_play+1
+			dcr l
+			dcr l
+			shld trb_play+1
 			ret								
 
 mus_play:
@@ -303,79 +315,79 @@ mus_play:
 			ret
 
 trb_play:
-			lxi h, stack_pos+1
-			mov a, m
+			lhld stack_pos+1
+			mov a,m
 			add a
-			 jnc  pl_frame				    
+			 jnc pl_frame				    
 pl1x:
 			;Process ref	
-			mov b, m
+			mov b,m
 			inx h
-			mov c, m
+			mov c,m
 			inx h
-			jp  pl10						
-pl11:	
-			mov a, m			
+			jp pl10						
+pl11:		
+			mov a,m			
 			inx h	
 			xchg
-			lxi  h, trb_play+1
-			dcr	 l
+			lhld trb_play+1
+			dcr l
 			dcr m
-			jz same_level_ref			
+			 jz same_level_ref			
 nested_ref:
 			;Save pos for the current nested level
-			inr	 l
-			mov	m,e
-			inr	l
-			mov	m,d
-			inr  l							
+			inr l
+			mov m,e
+			inr l
+			mov m,d
+			inr l							
 same_level_ref:
-			mov	 m,a
-			inr	 l
+			mov m,a
+			inr l
 			;update nested level
 			shld trb_play+1
 
 			xchg					
 			dad b	
-			mov a, m
+			mov a,m
 			add a		            		
 			call pl0x						
 			;Save pos for the new nested level
 			;save pos
 		        xchg
-			lxi	h, trb_play+1
-			mov	m,e
-			inr	l
-			mov	m,d			
+			lhld trb_play+1
+			mov m,e
+			inr l
+			mov m,d			
 			ret							 
 			
 
 savedByte:
-	                db 0
+	 db 0
 
 single_pause:
-			pop	 d
-			jmp	 after_play_frame
+			pop d
+			jmp after_play_frame
 long_pause:
-			inx	 h
-			mov	 a, m
 			inx h
-			jmp	 pause_cont
+			mov a,m
+			inx h
+			jmp pause_cont
 pl_pause:
-			ani	 $0f
+			ani $0f
 			inx h
-			 jz  single_pause
+			 jz single_pause
 pause_cont:
 			;set pause
 			sta pause_rep
 			xchg
-			lxi	h, trb_play+1
-			mov  a, l
+			lhld trb_play+1
+			mov a,l
 			sta saved_track+2
 
-			mov	m,e
-			inr	l
-			mov	m,d						
+			mov m,e
+			inr l
+			mov m,d						
 			
 			lda trb_play+2
 			sta savedByte
@@ -385,16 +397,16 @@ pause_cont:
 			lxi h,trb_pause
 			shld trb_play+1
 ;====================================================================						
-			pop	 h						
+			pop h						
 			ret								
 pause_or_psg1:
-			add	 a
-			mov a, m
-			jc  pl_pause
-			jz  long_pause
+			add a
+			mov a,m
+			 jc pl_pause
+			 jz long_pause
 		    ;psg1 or end of track
 			cpi $0f
-			 jz  endtrack
+			 jz endtrack
 			dcr a	 
 			inx h
 						
@@ -405,7 +417,7 @@ pause_or_psg1:
 			mov e,a
 			mvi d,0
 			dad d
-			XCHG
+			xchg
 			pop h
 			mov a,m
 			inx h
@@ -415,8 +427,8 @@ pause_or_psg1:
 			ret								
 
 pl00:
-			add	 a
-			jnc pause_or_psg1
+			add a
+			 jnc pause_or_psg1
 			
 			;psg2i
 			rrc
@@ -425,34 +437,36 @@ pl00:
 			lxi d,00000
 
 mus_low:
-			adi	 0
-			mov	 e, a
+			adi 0
+			mov e,a
 mus_high:
-			aci	 0
-			sub	 e
-			mov	 d, a					
-			ldax	 d
-			inx	 d
+			aci 0
+			sub e
+			mov d,a					
+			ldax d
+			inx d
 			
 					
 			push d
-			inx	 h							
+			inx h							
 			call reg_left_6_D5
 
 			
 			pop d
-			ldax	  d			
+			ldax d			
 					
 			add a			
 			jmp play_by_mask_13_6
 
+		
+
 pl10:
 			;save pos
 		        xchg
-			lxi	h, trb_play+1
-			mov	m,e
-			inr	l
-			mov	m,d			
+			lxi h, (trb_play+1)
+			mov m,e
+			inr l
+			mov m,d			
 
 			xchg
 
@@ -463,125 +477,127 @@ pl10:
 
 			dad b
 
-			mov a, m
+			mov a,m
 			add a		            		
 			
 			call pl0x
-			lxi	h, trb_play+1
+			lhld trb_play+1
 			jmp trb_rep						
 			
 
 
 pl0x:
 			add a					
-			 jnc  pl00						
+			 jnc pl00						
 
 pl01:
 			 ;player PSG2
 			inx h
-			 jz  play_all_0_5				
+			 jz play_all_0_5				
 play_by_mask_0_5:
 				add a
 				 jc f1
-	  		    mov b,a;push af
+	    		    mov b,a			
 				mov a,m 
 				 inx h
-				sta AYREGS + 0
-				mov a,b;pop af				
+				sta AYREGS+0
+				mov a,b
 f1:
 
 				add a
 				 jc f2
-			    mov b,a;push af
+			    mov b,a
 				mov a,m
 				 inx h
-				sta AYREGS + 0
-				mov a,b;pop af				
+				sta AYREGS+0
+				mov a,b
 f2:
 
 				add a
 				 jc f3
-			    mov b,a;push af
+			    mov b,a
 				mov a,m
 				 inx h
-				sta AYREGS + 0
-				mov a,b;pop af				
+				sta AYREGS+0
+				mov a,b
 f3:
 
 				add a
 				 jc f4
-			    mov b,a;push af
+			    mov b,a
 				mov a,m
 				inx h
-				sta AYREGS + 0
-				mov a,b;pop af				
+				sta AYREGS+0
+				mov a,b
 f4:
 
 				add a
 				 jc f5
-			    mov b,a;push af
+			    mov b,a
 				mov a,m
 				 inx h
-				sta AYREGS + 0
-				mov a,b;pop af				
+				sta AYREGS+0
+				mov a,b
 f5:
 			add a
-			 jc  play_all_0_5_end						
+			 jc play_all_0_5_end						
 			mov a,m
 			 inx h
-			sta AYREGS + 5
+			sta AYREGS+5
 second_mask:
-			mov a, m
+			mov a,m
 			inx h					
 before_6:
 			add a
 			 jz play_all_6_13							
 			jmp play_by_mask_13_6			
 play_all_0_5:
-			cma						; 0->ff			
+			cma	
+			; 0->ff			
 			mov a,m
 			inx h 			
-			sta AYREGS + 0
+			sta AYREGS+0
 
 				mov a,m
 				inx h 
-				sta AYREGS + 1
+				sta AYREGS+1
 				mov a,m
 				inx h 
-				sta AYREGS + 2
+				sta AYREGS+2
 				mov a,m
 				inx h 
-				sta AYREGS + 3
+				sta AYREGS+3
 				mov a,m
 				inx h 
-				sta AYREGS + 4
+				sta AYREGS+4
 				mov a,m
 				inx h 
-				sta AYREGS + 5
+				sta AYREGS+5
 				
 play_all_0_5_end:
-			mov a, m
+			mov a,m
 			inx h					
 			add a
 			 jnz play_by_mask_13_6
 play_all_6_13:
-			cma						; 0->ff, keep flag c
+			cma					
+			; 0->ff, keep flag c
 			; write regs [6..12] or [6..13] depend on flag
-			jc h7				; 4+7=11	
+			 jc h7				; 4+7=11	
 				
 				inx h
 				mov a,m
 				inx h
-				sta AYREGS + 7
+				sta AYREGS+7
 				mov a,m
 				inx h
-				sta AYREGS + 8
+				sta AYREGS+8
 				mov a,m
 				inx h
-				sta AYREGS + 9
+				sta AYREGS+9
 				mov a,m
 				inx h
-				sta AYREGS + 10
+				sta AYREGS+10
 				inx h
 				inx h				
 				inx h
@@ -590,16 +606,16 @@ h7:
 				inx h
 				mov a,m
 				inx h
-				sta AYREGS + 7
+				sta AYREGS+7
 				mov a,m
 				inx h
-				sta AYREGS + 8
+				sta AYREGS+8
 				mov a,m
 				inx h
-				sta AYREGS + 9
+				sta AYREGS+9
 				mov a,m
 				inx h
-				sta AYREGS + 10
+				sta AYREGS+10
 				inx h
 				inx h
 			ret			
@@ -624,7 +640,7 @@ e0:
 				mov e,a
 				mov a,m
 				inx h 				
-				sta AYREGS + 10
+				sta AYREGS+10
 				mov a,e
 e1:
 				add a
@@ -632,7 +648,7 @@ e1:
 				mov e,a
 				mov a,m
 				inx h 				
-				sta AYREGS + 9
+				sta AYREGS+9
 				mov a,e
 e2:
 				add a
@@ -640,7 +656,7 @@ e2:
 				mov e,a
 				mov a,m
 				inx h 				
-				sta AYREGS + 8
+				sta AYREGS+8
 				mov a,e
 e3:
 				add a
@@ -648,7 +664,7 @@ e3:
 				mov e,a
 				mov a,m
 				inx h 				
-				sta AYREGS + 7
+				sta AYREGS+7
 				mov a,e
 e4:
 
@@ -661,54 +677,54 @@ e4:
 reg_left_6_D5:
 			add a
 			 jc e5
-			mov e,a;push af
+			mov e,a
 			mov a,m
 			inx h
-			sta AYREGS + 5
-			mov a,e;pop af
+			sta AYREGS+5
+			mov a,e
 e5:
 
 				add a
 				 jc g1
-				mov e,a;push af
+				mov e,a
 				mov a,m
 				inx h 				
-				sta AYREGS + 4
-				mov a,e;pop af
+				sta AYREGS+4
+				mov a,e
 g1:
 				add a
 				 jc g2
-				mov e,a;push af
+				mov e,a
 				mov a,m
 				inx h 				
-				sta AYREGS + 3
-				mov a,e;pop af
+				sta AYREGS+3
+				mov a,e
 g2:
 				add a
 				 jc g3
-				mov e,a;push af
+				mov e,a
 				mov a,m
 				inx h 				
-				sta AYREGS + 2
-				mov a,e;pop af
+				sta AYREGS+2
+				mov a,e
 g3:
 				add a
 				 jc g4
-				mov e,a;push af
+				mov e,a
 				mov a,m
 				inx h 				
-				sta AYREGS + 1
-				mov a,e;pop af
+				sta AYREGS+1
+				mov a,e
 g4:
 			add a
 			 rc
 			mov a,m
 			inx h 
-			sta AYREGS + 0
+			sta AYREGS+0
 			ret					
 
 stack_pos:
-			;Make sure packed file has enough nested level here
+				;Make sure packed file has enough nested level here
 				DB 0	; counter
 				DW 0	; HL value (position)
 		                DB 0	; counter
