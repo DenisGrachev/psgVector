@@ -1,4 +1,6 @@
 
+
+        
 ;Если определана то играем в счётчик иначе в АУ
 ;регистры АУ
 AYREGS:
@@ -38,7 +40,6 @@ vCH2:  db 0
 vCH3:  db 0
 
 flushVI:
-
 	lda AYR7
 	ora a 
         rar
@@ -463,7 +464,7 @@ mus_high:
 pl10:
 			;save pos
 		        xchg
-			lxi h, (trb_play+1)
+			lhld trb_play+1
 			mov m,e
 			inr l
 			mov m,d			
