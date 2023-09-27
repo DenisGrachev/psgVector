@@ -1,4 +1,3 @@
-
 ;Если определана то играем в счётчик иначе в АУ
 ;регистры АУ
 AYREGS:
@@ -43,10 +42,10 @@ flushVI:
 	ora a 
         rar
         push psw
-	 jnc a1;канал включен
+	jnc a1;канал включен
         lda vCH1
         ora a
-         jz a2
+        jz a2
         mvi a,$36
         out 08;глушим канал
         xra a
@@ -224,21 +223,21 @@ stop:
 mus_init:
 			lxi h, music
 			mov	 a, l
-; cannot convert:			ld	 (mus_low+1), a
+			sta	 mus_low+1
 			mov	 a, h
-; cannot convert:			ld	 (mus_high+1), a
+			sta	 mus_high+1
 			lxi	d, 16*4
 			dad d
-; cannot convert:			ld (stack_pos+1), hl
+			SHLD stack_pos+1
 			mvi a, LD_HL_CODE
-; cannot convert:			ld (trb_play), a
+			sta trb_play
 
 			xra a
 			lxi h, stack_pos
 			mov m, a
 			inx h
 
-; cannot convert:			ld (trb_play+1), hl				
+			SHLD trb_play+1
 
 			mvi a,$36
 			out 08;
@@ -263,8 +262,8 @@ trb_pause:
 
 saved_track:
 			lxi h, LD_HL_CODE			; end of pause
-; cannot convert:			ld (trb_play), hl
-			lxi	h, (trb_play+1)		
+			SHLD trb_play
+			lxi	h, trb_play+1	
 			jmp trb_rep					
 			
 
@@ -278,11 +277,11 @@ pl_frame:
 			call pl0x						
 after_play_frame:
 			xra	 a
-; cannot convert:			ld	 (stack_pos), a				
+			sta stack_pos
 			
             ;save pos
 	        xchg
-			lxi	h, (trb_play+1)
+			lxi	h, trb_play+1
 			mov	m,e
 			inr	l
 			mov	m,d			
@@ -295,7 +294,7 @@ trb_rep:
 trb_rest:	
 			dcr	 l
 			dcr	 l
-; cannot convert:			ld	 (trb_play+1), hl
+			SHLD	 trb_play+1
 			ret								
 
 mus_play:
@@ -304,7 +303,7 @@ mus_play:
 			ret
 
 trb_play:
-			lxi h, (stack_pos+1)
+			lxi h, stack_pos+1
 			mov a, m
 			add a
 			 jnc  pl_frame				    
@@ -315,11 +314,11 @@ pl1x:
 			mov c, m
 			inx h
 			jp  pl10						
-pl11:	; cannot convert:		
+pl11:	
 			mov a, m			
 			inx h	
 			xchg
-			lxi  h, (trb_play+1)
+			lxi  h, trb_play+1
 			dcr	 l
 			dcr m
 			jz same_level_ref			
@@ -344,7 +343,7 @@ same_level_ref:
 			;Save pos for the new nested level
 			;save pos
 		        xchg
-			lxi	h, (trb_play+1)
+			lxi	h, trb_play+1
 			mov	m,e
 			inr	l
 			mov	m,d			
@@ -352,7 +351,7 @@ same_level_ref:
 			
 
 savedByte:
-	 db 0
+	                db 0
 
 single_pause:
 			pop	 d
@@ -368,11 +367,11 @@ pl_pause:
 			 jz  single_pause
 pause_cont:
 			;set pause
-; cannot convert:			ld (pause_rep), a	
+			sta pause_rep
 			xchg
-			lxi	h, (trb_play+1)
+			lxi	h, trb_play+1
 			mov  a, l
-; cannot convert:			ld (saved_track+2), a			
+			sta saved_track+2
 
 			mov	m,e
 			inr	l
@@ -406,7 +405,7 @@ pause_or_psg1:
 			mov e,a
 			mvi d,0
 			dad d
-; cannot convert:			ex hl,de
+			XCHG
 			pop h
 			mov a,m
 			inx h
@@ -450,7 +449,7 @@ mus_high:
 pl10:
 			;save pos
 		        xchg
-			lxi	h, (trb_play+1)
+			lxi	h, trb_play+1
 			mov	m,e
 			inr	l
 			mov	m,d			
@@ -468,7 +467,7 @@ pl10:
 			add a		            		
 			
 			call pl0x
-			lxi	h, (trb_play+1)
+			lxi	h, trb_play+1
 			jmp trb_rep						
 			
 
